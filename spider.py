@@ -35,13 +35,19 @@ def split_data(date_soup):
     #     for (td_index, td) in enumerate(tr.findAll('td')):
     #         print(td_index, td.get_text(strip=True))
 
+    # 解析日期
+    date = date_soup.find(text=re.compile("时间:")).parent.parent.text.split(':')
+
+    # 解析表数据
     for (tr_index, tr) in enumerate(date_soup.select('tbody tr')):
         # 初始化
         if tr_index == 0:
             key = []
         else:
             data = {}.fromkeys(key)
+            data[date[0]] = date[1]
 
+        # 构造数据dict
         for (td_index, td) in enumerate(tr.findAll('td')):
             # 表头为json键
             if tr_index == 0:
