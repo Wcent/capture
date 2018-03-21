@@ -47,13 +47,17 @@ def split_data(date_soup):
             data = {}.fromkeys(key)
             data[date[0]] = date[1]
 
-        # 构造数据dict
-        for (td_index, td) in enumerate(tr.findAll('td')):
-            # 表头为json键
-            if tr_index == 0:
+        # 表头为json键
+        if tr_index == 0:
+            # 表头为th标签
+            for (td_index, th) in enumerate(tr.findAll('th')):
+                key.append(th.get_text(strip=True))
+            # 表头为td标签
+            for (td_index, td) in enumerate(tr.findAll('td')):
                 key.append(td.get_text(strip=True))
-            # 表项为json值
-            else:
+        # 表项为json值
+        else:
+            for (td_index, td) in enumerate(tr.findAll('td')):
                 data[key[td_index]] = td.get_text(strip=True)
 
         # 数据转换：dict -> json
@@ -64,4 +68,4 @@ def split_data(date_soup):
 
 # todo some test
 if __name__ == '__main__':
-    spider(page_num=1)
+    spider(page_num=200)
