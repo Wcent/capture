@@ -14,7 +14,12 @@ import re
 
 def spider(page_num):
     # 按页码获取每日行情页面
-    response = requests.get('http://www.sge.com.cn/sjzx/mrhqsj?p=%d' % page_num)
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                            'Chrome/67.0.3396.87 Safari/537.36'}
+    response = requests.get('http://www.sge.com.cn/sjzx/mrhqsj?p={num}'.format(num=page_num), headers=headers)
+    if response.status_code != 200:
+        print('Failure', response.status_code)
+        return
     response.encoding = 'utf-8'
     soup = BeautifulSoup(response.text, "lxml")
 
@@ -22,7 +27,10 @@ def spider(page_num):
     date_list = soup.findAll(href=re.compile("/sjzx/mrhqsj/"))
     for date in date_list:
         # 构造url，获取某日行情数据页面
-        date_response = requests.get('http://www.sge.com.cn' + date['href'])
+        date_response = requests.get('http://www.sge.com.cn' + date['href'], headers=headers)
+        if date_response.status_code != 200:
+            print('Error', date_response.status_code)
+            return
         date_response.encoding = 'utf-8'
         date_soup = BeautifulSoup(date_response.text, 'lxml')
         # 解析table，转换为json
@@ -68,4 +76,4 @@ def split_data(date_soup):
 
 # todo some test
 if __name__ == '__main__':
-    spider(page_num=200)
+    spider(page_num=1)
