@@ -11,12 +11,14 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import re
+import time
 
 def spider(page_num):
-    # 按页码获取每日行情页面
+    # 伪装浏览器访问的请求头部，防止被反爬虫处理
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                             'Chrome/67.0.3396.87 Safari/537.36'}
-    response = requests.get('http://www.sge.com.cn/sjzx/mrhqsj?p={num}'.format(num=page_num), headers=headers)
+    # 以页码为url参数请求每日行情页面
+    response = requests.get('http://www.sge.com.cn/sjzx/mrhqsj', params={'p': str(page_num)}, headers=headers)
     if response.status_code != 200:
         print('Failure', response.status_code)
         return
@@ -26,6 +28,9 @@ def spider(page_num):
     # 找到每日行情链接列表
     date_list = soup.findAll(href=re.compile("/sjzx/mrhqsj/"))
     for date in date_list:
+        # 限制访问频率，避免IP被封
+        time.sleep(3)
+
         # 构造url，获取某日行情数据页面
         date_response = requests.get('http://www.sge.com.cn' + date['href'], headers=headers)
         if date_response.status_code != 200:
